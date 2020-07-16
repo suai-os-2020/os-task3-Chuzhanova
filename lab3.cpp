@@ -72,7 +72,7 @@ DWORD WINAPI thread_b(LPVOID lpParam) {
 		ReleaseMutex(lock);
 		computation();
 	}
-	ReleaseSemaphore(semaphore_b, 2, NULL);
+	ReleaseSemaphore(semaphore_b, 3, NULL);
 	return TRUE;
 }
 DWORD WINAPI thread_c(LPVOID lpParam) {
@@ -99,7 +99,7 @@ DWORD WINAPI thread_d(LPVOID lpParam) {
 		computation();
 	}
 	ReleaseSemaphore(semaphore_d, 2, NULL);
-
+   // WaitForSingleObject(semaphore_c, INFINITE);
 	WaitForSingleObject(semaphore_b, INFINITE);
 	WaitForSingleObject(semaphore_c, INFINITE);
 	for (int i = 0; i < 3; i++) {
@@ -178,16 +178,22 @@ DWORD WINAPI thread_h(LPVOID lpParam) {
 		ReleaseMutex(lock);
 		computation();
 	}
-	ReleaseSemaphore(semaphore_h, 2, NULL);
+	ReleaseSemaphore(semaphore_h, 3, NULL);
 
 	WaitForSingleObject(semaphore_f, INFINITE);
 	WaitForSingleObject(semaphore_g, INFINITE);
+
+    ReleaseSemaphore(semaphore_k1, 1, NULL);
 	for (int i = 0; i < 3; i++) {
+
+        WaitForSingleObject(semaphore_k1, INFINITE);
 		WaitForSingleObject(lock, INFINITE);
 		std::cout << 'h' << std::flush;
 		ReleaseMutex(lock);
 		computation();
+        ReleaseSemaphore(semaphore_h1, 1, NULL);
 	}
+    WaitForSingleObject(semaphore_k1, INFINITE);
 	ReleaseSemaphore(semaphore_h, 2, NULL);
 	return TRUE;
 }
@@ -198,10 +204,12 @@ DWORD WINAPI thread_i(LPVOID lpParam) {
 	WaitForSingleObject(semaphore_g, INFINITE);
 	WaitForSingleObject(semaphore_h, INFINITE);
 	for (int i = 0; i < 3; i++) {
+        WaitForSingleObject(semaphore_h1, INFINITE);
 		WaitForSingleObject(lock, INFINITE);
 		std::cout << 'i' << std::flush;
 		ReleaseMutex(lock);
 		computation();
+        ReleaseSemaphore(semaphore_i1, 1, NULL);
 	}
 	ReleaseSemaphore(semaphore_i, 2, NULL);
 	return TRUE;
@@ -213,15 +221,17 @@ DWORD WINAPI thread_k(LPVOID lpParam) {
 	WaitForSingleObject(semaphore_g, INFINITE);
 	WaitForSingleObject(semaphore_h, INFINITE);
 	for (int i = 0; i < 3; i++) {
+        WaitForSingleObject(semaphore_i1, INFINITE);
 		WaitForSingleObject(lock, INFINITE);
 		std::cout << 'k' << std::flush;
 		ReleaseMutex(lock);
 		computation();
+        ReleaseSemaphore(semaphore_k1, 1, NULL);
 	}
 	ReleaseSemaphore(semaphore_k, 1, NULL);
 
-	WaitForSingleObject(semaphore_i, INFINITE);
-	WaitForSingleObject(semaphore_k, INFINITE);
+    WaitForSingleObject(semaphore_i, INFINITE);
+    WaitForSingleObject(semaphore_h, INFINITE);
 	for (int i = 0; i < 3; i++) {
 		WaitForSingleObject(lock, INFINITE);
 		std::cout << 'k' << std::flush;
@@ -282,18 +292,26 @@ int lab3_init() {
 	if (semaphore_g == NULL) {
 		std::cerr << "CreateSemaphore error: " << GetLastError() << '\n'; return 1;
 	}
-	semaphore_h = CreateSemaphore(NULL, 0, 11, NULL);
-	if (semaphore_h == NULL) {
+    semaphore_h = CreateSemaphore(NULL, 0, 11, NULL);
+    if (semaphore_h == NULL) {
+        std::cerr << "CreateSemaphore error: " << GetLastError() << '\n'; return 1;
+    }
+    semaphore_h1 = CreateSemaphore(NULL, 0, 11, NULL);
+    if (semaphore_h1 == NULL) {
+        std::cerr << "CreateSemaphore error: " << GetLastError() << '\n'; return 1;
+    }
+	semaphore_i1 = CreateSemaphore(NULL, 0, 11, NULL);
+	if (semaphore_i1 == NULL) {
 		std::cerr << "CreateSemaphore error: " << GetLastError() << '\n'; return 1;
 	}
-	semaphore_i = CreateSemaphore(NULL, 0, 11, NULL);
-	if (semaphore_i == NULL) {
-		std::cerr << "CreateSemaphore error: " << GetLastError() << '\n'; return 1;
-	}
-	semaphore_k = CreateSemaphore(NULL, 0, 11, NULL);
-	if (semaphore_k == NULL) {
-		std::cerr << "CreateSemaphore error: " << GetLastError() << '\n'; return 1;
-	}
+    semaphore_k = CreateSemaphore(NULL, 0, 11, NULL);
+    if (semaphore_k == NULL) {
+        std::cerr << "CreateSemaphore error: " << GetLastError() << '\n'; return 1;
+    }
+    semaphore_k1 = CreateSemaphore(NULL, 0, 11, NULL);
+    if (semaphore_k1 == NULL) {
+        std::cerr << "CreateSemaphore error: " << GetLastError() << '\n'; return 1;
+    }
 	semaphore_m = CreateSemaphore(NULL, 0, 11, NULL);
 	if (semaphore_m == NULL) {
 		std::cerr << "CreateSemaphore error: " << GetLastError() << '\n'; return 1;
