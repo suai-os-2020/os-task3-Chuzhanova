@@ -28,13 +28,6 @@
 
 #endif
 
-#include <list>
-
- 
-
- 
-
- 
 
 HANDLE lock;
 
